@@ -1,0 +1,170 @@
+{% load static %}
+<!-- partials/sidebar.html -->
+<aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+  <!-- Sidebar Brand -->
+  <div class="sidebar-brand">
+    <a href="#" class="brand-link">
+      <img
+        src="{% static 'img/logo-ori.png' %}"
+        alt="HAAP Logo"
+        class="brand-image opacity-75 shadow"
+      />
+      <span class="brand-text fw-light">HAAP Dashboard</span>
+    </a>
+  </div>
+
+  <!-- Sidebar Wrapper -->
+  <div class="sidebar-wrapper">
+    <nav class="mt-2">
+      <ul
+        class="nav sidebar-menu flex-column"
+        data-lte-toggle="treeview"
+        role="navigation"
+        aria-label="Main navigation"
+        data-accordion="false"
+        id="navigation"
+      >
+
+        <!-- Dashboard -->
+      {% if user.role == "moe_admin" %}
+        <li class="nav-item">
+          <a href="{% url 'core:moe_admin_dashboard' %}" class="nav-link active">
+            <i class="nav-icon bi bi-speedometer2"></i>
+            <p>Admin Dashboard </p>
+          </a>
+        </li>
+        {% elif user.role == "parent" %}
+        <li class="nav-item">
+          <a href="{% url 'core:children_list' %}" class="nav-link active">
+            <i class="nav-icon bi bi-speedometer2"></i>
+            <p>Dashboard ba Pais</p>
+          </a>
+        </li>
+      {% elif user.role == "municipality_analyst" %}
+        <li class="nav-item">
+          <a href="{% url 'core:municipality_dashboard' %}" class="nav-link active">
+            <i class="nav-icon bi bi-bar-chart"></i>
+            <p>Dashboard ba Munisipalidade</p>
+          </a>
+        </li>
+      {% elif user.role == "teacher" %}
+        <li class="nav-item">
+          <a href="{% url 'core:teacher_dashboard' %}" class="nav-link active">
+            <i class="nav-icon bi bi-journal-text"></i>
+            <p>Dashboard ba Professor</p>
+          </a>
+        </li>
+      {% endif %}
+
+        {% if user.role == "moe_admin" %}
+          <!-- User Management (Admin only) -->
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon bi bi-people-fill"></i>
+              <p>
+                Utilizadores
+                <i class="nav-arrow bi bi-chevron-right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'core:user_management'%}" class="nav-link">
+                  <i class="nav-icon bi bi-circle"></i>
+                  <p>Utilizadores </p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle"></i>
+                  <p>Inan aman</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle"></i>
+                  <p>Professor</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link">
+                  <i class="nav-icon bi bi-circle"></i>
+                  <p>analista munisipal</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- APK Versions -->
+          <li class="nav-item">
+            <a href="{% url 'core:apk_list' %}" class="nav-link">
+              <i class="nav-icon bi bi-phone"></i>
+              <p>Versoes APK</p>
+            </a>
+          </li>
+
+          <!-- System Settings -->
+          <li class="nav-header">SYSTEMA</li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon bi bi-gear-fill"></i>
+              <p>Settings</p>
+            </a>
+          </li>
+        {% elif user.role == "parent" %}
+          <!-- Children for Parents -->
+          <li class="nav-item">
+            <a href="{% url 'core:children_list' %}" class="nav-link">
+              <i class="nav-icon bi bi-person-badge"></i>
+              <p>Hau nia oan</p>
+            </a>
+          </li>
+           <!-- APK Versions -->
+          <li class="nav-item">
+              <a href="{% url 'core:latest_apk' %}" class="nav-link">
+                  <i class="nav-icon bi bi-phone"></i>
+                  <p>
+                      Download APK
+                      {% if versions %}
+                          <span class="badge bg-danger ms-1">Foun</span>
+                      {% endif %}
+                  </p>
+              </a>
+          </li>
+
+        {% elif user.role == "municipality_analyst" %}
+          <!-- Municipality Dashboard -->
+          <li class="nav-item">
+            <a href="{% url 'core:municipality_dashboard' %}" class="nav-link">
+              <i class="nav-icon bi bi-bar-chart"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+        {% elif user.role == "teacher" %}
+          <!-- Teacher Dashboard -->
+          <li class="nav-item">
+            <a href="{% url 'core:teacher_dashboard' %}" class="nav-link">
+              <i class="nav-icon bi bi-person-badge"></i>
+              <p>Dashboard ba Professor</p>
+            </a>
+          </li>
+        {% endif %}
+
+        <!-- Logs (all roles can see) -->
+        <li class="nav-item">
+          <a href="{% url 'core:app_usage_logs' %}" class="nav-link">
+            <i class="nav-icon bi bi-gear-fill"></i>
+            <p>Logs</p>
+          </a>
+        </li>
+
+        <!-- Logout -->
+        <li class="nav-item">
+          <a href="{% url 'core:logout' %}" class="nav-link">
+            <i class="nav-icon bi bi-box-arrow-right"></i>
+            <p>Sair</p>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</aside>

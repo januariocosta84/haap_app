@@ -1,0 +1,88 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>🏛 Dashboard Munisipiu - {{ municipality.name }}</h2>
+  <hr>
+  <!-- Summary Stats -->
+  <div class="row mt-4">
+    <div class="col-md-4">
+      <div class="card text-center shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">👨‍👩‍👧 Parentes</h5>
+          <p class="display-4">{{ parents_count }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">📚 Formadores</h5>
+          <p class="display-4">{{ teachers_count }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">🧒 Labarik sira</h5>
+          <p class="display-4">{{ children_count }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mt-5" id="municipalityTabs" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" id="parents-tab" data-toggle="tab" href="#parents" role="tab">Parentes</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="teachers-tab" data-toggle="tab" href="#teachers" role="tab">Formadores</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="children-tab" data-toggle="tab" href="#children" role="tab">Labarik sira</a>
+    </li>
+  </ul>
+
+  <div class="tab-content mt-3" id="municipalityTabsContent">
+    <!-- Parents Tab -->
+    <div class="tab-pane fade show active" id="parents" role="tabpanel">
+      <ul class="list-group">
+        {% for parent in parents_list %}
+          <li class="list-group-item">
+            {{ parent.first_name }} {{ parent.last_name }} — {{ parent.municipality.name }}
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Parentes la iha munisipiu ne'e.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Teachers Tab -->
+    <div class="tab-pane fade" id="teachers" role="tabpanel">
+      <ul class="list-group">
+        {% for teacher in teachers_list %}
+          <li class="list-group-item">
+            {{ teacher.first_name }} {{ teacher.last_name }} — {{ teacher.municipality.name }}
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Formadores la iha munisipiu ne'e.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Children Tab -->
+    <div class="tab-pane fade" id="children" role="tabpanel">
+      <ul class="list-group">
+        {% for child in children_list %}
+          <li class="list-group-item">
+            {{ child.first_name }} {{ child.last_name }} — Parent: {{ child.parent.first_name }} {{ child.parent.last_name }}
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Labarik sira la iha munisipiu ne'e.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

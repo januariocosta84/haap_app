@@ -1,0 +1,168 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+  <h3>Kria Utilizador Foun</h3>
+  <hr>
+  <form method="post" class="mt-3">
+     {% csrf_token %}
+   <div class="row">
+          <div class="col-md-6 mb-2">
+            <label for="id_first_name" class="form-label">Naran Uluk*</label>
+            {{ form.first_name }}
+          </div>
+          <div class="col-md-6 mb-2">
+            <label for="id_last_name" class="form-label">Naran Ikus</label>
+            {{ form.last_name }}
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label for="id_whatsapp_number" class="form-label">Numeru WhatsApp</label>
+          {{ form.whatsapp_number }}
+          <small id="phone-error" class="text-danger d-none"></small>
+        </div>
+
+        <div class="mb-2">
+          <label for="id_email" class="form-label">Email (Opsional)</label>
+          {{ form.email }}
+        </div>
+
+        <div class="mb-2">
+          <label for="id_address" class="form-label">Hela Fatin</label>
+          {{ form.address }}
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-2">
+            <label for="id_municipality" class="form-label">Munisípiu</label>
+            {{ form.municipality }}
+          </div>
+          <div class="col-md-6 mb-2">
+            <label for="id_administrative_post" class="form-label">Postu Administrativu</label>
+            {{ form.administrative_post }}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-2">
+            <label for="id_suco" class="form-label">Suku</label>
+            {{ form.suco }}
+          </div>
+          <div class="col-md-6 mb-2">
+            <label for="id_aldeia" class="form-label">Aldeia</label>
+            {{ form.aldeia }}
+          </div>
+        </div>
+        <div class="mb-2">
+          <label for="id_role" class="form-label">Role</label>
+          {{ form.role }}
+        </div>
+
+        <div class="mb-3">
+          <label for="id_password" class="form-label">Password</label>
+          {{ form.password }}
+        </div>
+   <button type="submit" id="submit-button" class="btn btn-primary">Kria Utilizador</button>
+
+  </form>
+</div>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Phone validation script -->
+<script>
+$(document).ready(function () {
+  // Load Administrative Posts when municipality changes
+  $("#id_municipality").change(function () {
+    var municipalityId = $(this).val();
+    $("#id_administrative_post").html('<option value="">Hili Postu Administrativu</option>');
+    $("#id_suco").html('<option value="">Hili Suku</option>');
+    $("#id_aldeia").html('<option value="">Hili Aldeia</option>');
+
+    if (municipalityId) {
+      $.ajax({
+        url: "{% url 'core:ajax_load_admin_posts' %}",
+        data: { municipality_id: municipalityId },
+        success: function(data) {
+          data.forEach(p => $("#id_administrative_post").append(new Option(p.name, p.id)));
+        }
+      });
+    }
+  });
+
+  // Load Sucos when administrative post changes
+  $("#id_administrative_post").change(function () {
+    var postId = $(this).val();
+    $("#id_suco").html('<option value="">Hili Suku</option>');
+    $("#id_aldeia").html('<option value="">Hili Aldeia</option>');
+
+    if (postId) {
+      $.ajax({
+        url: "{% url 'core:ajax_load_sucos' %}",
+        data: { administrative_post_id: postId },
+        success: function(data) {
+          data.forEach(s => $("#id_suco").append(new Option(s.name, s.id)));
+        }
+      });
+    }
+  });
+
+  // Load Aldeias when suco changes
+  $("#id_suco").change(function () {
+    var sucoId = $(this).val();
+    $("#id_aldeia").html('<option value="">Hili Aldeia</option>');
+
+    if (sucoId) {
+      $.ajax({
+        url: "{% url 'core:ajax_load_aldeias' %}",
+        data: { suco_id: sucoId },
+        success: function(data) {
+          data.forEach(a => $("#id_aldeia").append(new Option(a.name, a.id)));
+        }
+      });
+    }
+  });
+
+  // WhatsApp validation
+  const phoneInput = document.getElementById("id_whatsapp_number");
+  const errorDisplay = document.getElementById("phone-error");
+  const submitButton = document.getElementById("submit-button");
+  const timorPhoneRegex = /^\+6707\d{7}$/;
+
+  phoneInput.addEventListener("input", () => {
+    let phone = phoneInput.value.trim();
+    if (phone.startsWith("7")) phone = "+670" + phone;
+    else if (phone.startsWith("670")) phone = "+" + phone;
+    phoneInput.value = phone;
+
+    errorDisplay.classList.add("d-none");
+    submitButton.disabled = false;
+
+    if (phone && !timorPhoneRegex.test(phone)) {
+      errorDisplay.textContent = "Numeru WhatsApp tenke komesa ho +6707...";
+      errorDisplay.classList.remove("d-none");
+      //alert("Numeru WhatsApp la loos! Tenke komesa ho +6707..."); // ✅ ALERT ADDED
+      submitButton.disabled = true;
+      return;
+    }
+
+    if (timorPhoneRegex.test(phone)) {
+      fetch(`/check-whatsapp-number/?number=${encodeURIComponent(phone)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.exists) {
+            errorDisplay.textContent = "Numeru WhatsApp ida ne’e rejistadu ona.";
+            errorDisplay.classList.remove("d-none");
+            alert("Numeru WhatsApp ida ne’e rejistadu ona!"); // ✅ ALERT ADDED
+            submitButton.disabled = true;
+          }
+        }).catch(err => console.error("Error checking WhatsApp:", err));
+    }
+  });
+});
+
+</script>
+{% endblock %}

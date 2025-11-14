@@ -1,0 +1,84 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h3>All Parents and Their Children (Dummy Records)</h3>
+
+<!-- Export Buttons -->
+<div class="mb-3">
+  <button class="btn btn-success" id="exportExcel">Export to Excel</button>
+  <button class="btn btn-danger" id="exportPDF">Export to PDF</button>
+</div>
+
+<table class="table table-bordered table-striped" id="parentChildTable">
+  <thead>
+    <tr>
+      <th>Parent Username</th>
+      <th>Parent Email</th>
+      <th>Child First Name</th>
+      <th>Year of Birth</th>
+      <th>Age Group</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in page_obj %}
+      <tr>
+        <td>{{ row.parent_username }}</td>
+        <td>{{ row.parent_email }}</td>
+        <td>{{ row.child_first_name }}</td>
+        <td>{{ row.year_of_birth }}</td>
+        <td>{{ row.age_group }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Pagination Controls -->
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Previous</span></li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+      {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Next</span></li>
+    {% endif %}
+  </ul>
+</nav>
+
+<!-- Scripts for Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+// Export to Excel
+document.getElementById('exportExcel').addEventListener('click', function() {
+    var wb = XLSX.utils.table_to_book(document.getElementById('parentChildTable'), {sheet:"Sheet1"});
+    XLSX.writeFile(wb, 'Parents_Children.xlsx');
+});
+
+// Export to PDF
+document.getElementById('exportPDF').addEventListener('click', function() {
+    const { jsPDF } = window.jspdf;
+    var doc = new jsPDF();
+    doc.autoTable({ html: '#parentChildTable' }); // requires jsPDF AutoTable plugin
+    doc.save('Parents_Children.pdf');
+});
+</script>
+
+{% endblock %}

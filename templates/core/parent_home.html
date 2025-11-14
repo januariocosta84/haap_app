@@ -1,0 +1,67 @@
+{% extends 'core/base.html' %}
+
+<!-- dashboard.html -->
+
+
+{% block title %}Parent Dashboard{% endblock %}
+
+{% block page_title %}Parent Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <p>Welcome to Parent Dashboard!</p>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-12 d-flex justify-content-between align-items-center">
+    <h4>Your Children</h4>
+    <button class="btn btn-success">Add Children</button>
+  </div>
+</div>
+
+<div class="row mt-3">
+  <div class="col-12">
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>First Name</th>
+          <th>Year of Birth</th>
+          <th>Age Group</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Ana</td>
+          <td>2020</td>
+          <td>Group A: 3-4 years</td>
+          <td>
+            <button class="btn btn-sm btn-primary">Edit</button>
+            <button class="btn btn-sm btn-danger">Delete</button>
+          </td>
+        </tr>
+        <tr>
+          <td>Beto</td>
+          <td>2018</td>
+          <td>Group B: 5-6 years</td>
+          <td>
+            <button class="btn btn-sm btn-primary">Edit</button>
+            <button class="btn btn-sm btn-danger">Delete</button>
+          </td>
+        </tr>
+        <tr>
+          <td>Carlos</td>
+          <td>2019</td>
+          <td>Group B: 5-6 years</td>
+          <td>
+            <button class="btn btn-sm btn-primary">Edit</button>
+            <button class="btn btn-sm btn-danger">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

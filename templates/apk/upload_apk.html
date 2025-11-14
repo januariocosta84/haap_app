@@ -1,0 +1,27 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="container-fluid mt-4">
+  <h3>Upload APK Foun</h3>
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Versaun APK (Hanoin: 1.0.3)</label>
+      {{ form.version_name }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Download URL (Lian: https://example.com/app.apk)</label>
+      {{ form.download_url }}
+    </div>
+
+    <div class="form-check mb-3">
+      {{ form.is_latest }}
+      <label class="form-check-label ms-1">Ne'e mak versaun foun-liu?</label>
+    </div>
+
+    <button type="submit" class="btn btn-success">Hatudu / Upload</button>
+    <a href="{% url 'core:apk_list' %}" class="btn btn-secondary">Kansela</a>
+  </form>
+</div>
+{% endblock %}

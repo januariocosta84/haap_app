@@ -1,0 +1,92 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row ">
+    <div class="col">
+      <div class="card card-primary card-outline shadow-sm mt-4">
+        <div class="card-header bg-white">
+          <h3 class="mb-0">User Profile</h3>
+        </div>
+
+        <div class="card-body">
+          <div class="row align-items-center">
+            <!-- Profile Picture (Left) -->
+            <div class="col-12 col-md-4 text-center mb-4 mb-md-0">
+              {% if user.image %}
+                <img src="{{ user.image.url }}" 
+                     alt="Profile Picture" 
+                     class="img-fluid rounded-circle shadow-sm"
+                     style="width: 150px; height: 150px; object-fit: cover;">
+              {% else %}
+                <img src="{% static 'images/default-avatar.png' %}" 
+                     alt="Default Profile Picture" 
+                     class="img-fluid rounded-circle shadow-sm"
+                     style="width: 150px; height: 150px; object-fit: cover;">
+              {% endif %}
+
+              <!-- Upload Form -->
+              <form method="post" enctype="multipart/form-data" class="mt-3">
+                {% csrf_token %}
+                {{ form.profile_picture }}
+                <button type="submit" class="btn btn-primary btn-sm mt-2">
+                  <i class="fas fa-upload"></i> Update Picture
+                </button>
+              </form>
+            </div>
+
+            <!-- Profile Information (Right) -->
+            <div class="col-12 col-md-8">
+              <h4 class="mb-4">Profile Information</h4>
+
+              <div class="row mb-2">
+                <div class="col-5"><strong>Full Name:</strong></div>
+                <div class="col-7">{{ user.get_full_name|default:"Not set" }}</div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-5"><strong>Email:</strong></div>
+                <div class="col-7">{{ user.email|default:"Not set" }}</div>
+              </div>
+            
+              <div class="row mb-2">
+                <div class="col-5"><strong>WhatsApp:</strong></div>
+                <div class="col-7">{{ user.whatsapp_number|default:"Not provided" }}</div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-5"><strong>Role:</strong></div>
+                <div class="col-7">
+                  {% if user.is_superuser %}
+                    Administrator
+                  {% elif user.is_staff %}
+                    Staff
+                  {% else %}
+                    Regular User
+                  {% endif %}
+                </div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-5"><strong>Date Joined:</strong></div>
+                <div class="col-7">{{ user.date_joined|date:"M d, Y"|default:"Unknown" }}</div>
+              </div>
+              <div class="row mb-2">
+                <div class="col-5"><strong>Last Login:</strong></div>
+                <div class="col-7">{{ user.last_login|date:"M d, Y H:i"|default:"Never" }}</div>
+              </div>
+
+              <div class="mt-4 d-flex gap-2">
+                <a href="#" class="btn btn-warning">
+                  <i class="fas fa-edit"></i> Edit Profile
+                </a>
+                <a href="#" class="btn btn-secondary">
+                  <i class="fas fa-key"></i> Change Password
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

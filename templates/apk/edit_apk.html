@@ -1,0 +1,40 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+  {# ✅ Success / error messages — shows after redirect if "messages.success" is triggered #}
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <h3>Altera APK: {{ apk.version_name }}</h3>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+      <label class="form-label">Versaun APK</label>
+      {{ form.version_name }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Download URL</label>
+      {{ form.download_url }}
+    </div>
+
+    <div class="form-check mb-3">
+      {{ form.is_latest }}
+      <label class="form-check-label ms-1">Ne'e mak versaun foun-liu?</label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Rai Mudansa</button>
+    <a href="{% url 'core:apk_list' %}" class="btn btn-secondary">Kansela</a>
+  </form>
+</div>
+{% endblock %}

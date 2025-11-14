@@ -1,0 +1,13 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="container-fluid mt-4">
+  <h3>Delete Child</h3>
+  <p>Are you sure you want to delete <strong>{{ child.first_name }}</strong> ({{ child.get_age_group_display }})?</p>
+  
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+    <a href="{% url 'core:children_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

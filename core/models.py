@@ -1,0 +1,313 @@
+# core/models.py
+
+import os
+import uuid
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
+# ---------------------------------
+# 1. Municipality
+# ---------------------------------
+class Municipality(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        db_table = 'municipalities'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+# ---------------------------------
+# 2. Administrative Post
+# ---------------------------------
+class AdministrativePost(models.Model):
+    id = models.AutoField(primary_key=True)
+    municipality = models.ForeignKey(Municipality, on_delete=models.CASCADE, related_name="administrative_posts")
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = 'administrative_posts'
+        unique_together = ('municipality', 'name')
+        ordering = ['municipality__name', 'name']
+
+    def __str__(self):
+        return f"{self.name}, {self.municipality.name}"
+
+
+# ---------------------------------
+# 3. Suco
+# ---------------------------------
+class Suco(models.Model):
+    id = models.AutoField(primary_key=True)
+    administrative_post = models.ForeignKey(AdministrativePost, on_delete=models.CASCADE, related_name="sucos")
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = 'sucos'
+        unique_together = ('administrative_post', 'name')
+        ordering = ['administrative_post__name', 'name']
+
+    def __str__(self):
+        return f"{self.name}, {self.administrative_post.name}"
+
+
+# ---------------------------------
+# 4. Aldeia
+# ---------------------------------
+class Aldeia(models.Model):
+    id = models.AutoField(primary_key=True)
+    suco = models.ForeignKey(Suco, on_delete=models.CASCADE, related_name="aldeias")
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = 'aldeias'
+        unique_together = ('suco', 'name')
+        ordering = ['suco__name', 'name']
+
+    def __str__(self):
+        return f"{self.name}, {self.suco.name}"
+
+# user profile image upload path
+def user_image_upload_path(instance, filename):
+    # Store uploads in "users/<user_id>/<filename>"
+    ext = filename.split('.')[-1]
+    filename = f"profile.{ext}"
+    return os.path.join("users", str(instance.id), filename)
+
+class User(AbstractUser):
+    image = models.ImageField(
+        upload_to=user_image_upload_path,
+        default="defaults/user.png",   # <-- place a default image in MEDIA_ROOT/defaults/user.png
+        blank=True,
+        null=True
+    )
+    ROLE_CHOICES = [
+        ('parent', 'Parent/Carer'),
+        ('moe_admin', 'MoE Admin'),
+        ('municipality_analyst', 'Municipality Analyst'),
+        ('teacher', 'Teacher'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    role = models.CharField(max_length=30, choices=ROLE_CHOICES)
+    whatsapp_number = models.CharField(max_length=15, unique=True)
+    email = models.EmailField(blank=True, null=True)
+
+    # New fields for parent registration
+    first_name = models.CharField(max_length=50)  # already in AbstractUser
+    last_name = models.CharField(max_length=50)   # already in AbstractUser
+    address = models.CharField(max_length=255, blank=True, null=True)
+
+    municipality = models.ForeignKey(Municipality, on_delete=models.SET_NULL, null=True, blank=True, related_name="users")
+    administrative_post = models.ForeignKey(AdministrativePost, on_delete=models.SET_NULL, null=True, blank=True, related_name="users")
+    suco = models.ForeignKey(Suco, on_delete=models.SET_NULL, null=True, blank=True, related_name="users")
+    aldeia = models.ForeignKey(Aldeia, on_delete=models.SET_NULL, null=True, blank=True, related_name="users")
+
+    is_verified = models.BooleanField(default=False)
+    temp_password = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    USERNAME_FIELD = 'whatsapp_number'
+    REQUIRED_FIELDS = ['username', 'role']
+
+    class Meta:
+        db_table = 'users'
+        indexes = [
+            models.Index(fields=['whatsapp_number']),
+            models.Index(fields=['role', 'municipality']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_full_name()} ({self.get_role_display()})"
+    
+# ---------------------------------
+# 2. Location Hierarchy
+# ---------------------------------
+class Location(models.Model):
+    TYPE_CHOICES = [
+        ('municipality', 'Municipality'),
+        ('town', 'Town'),
+        ('village', 'Village'),
+    ]
+
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='children'
+    )
+
+    class Meta:
+        db_table = 'locations'
+        indexes = [
+            models.Index(fields=['type']),
+            models.Index(fields=['parent']),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.get_type_display()})"
+
+
+# ---------------------------------
+# 3. Child Profile
+# ---------------------------------
+class Child(models.Model):
+    AGE_GROUP_CHOICES = [
+        ('A', 'Group A: 3-4 years'),
+        ('B', 'Group B: 5-6 years'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    parent = models.ForeignKey(User, on_delete=models.CASCADE, related_name='children')
+    first_name = models.CharField(max_length=50)
+    year_of_birth = models.PositiveSmallIntegerField()
+    age_group = models.CharField(max_length=1, choices=AGE_GROUP_CHOICES)
+
+    # Auto-generated login ID (like a student code)
+    user_id = models.CharField(max_length=30, unique=True, editable=False, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'children'
+        indexes = [
+            models.Index(fields=['parent']),
+            models.Index(fields=['age_group']),
+            models.Index(fields=['user_id']),
+        ]
+
+    def save(self, *args, **kwargs):
+        if not self.user_id:
+            # Example format: CH-XXXXXX (unique code)
+            self.user_id = f"{self.first_name[:3].upper()}-{uuid.uuid4().hex[:6].upper()}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.first_name} ({self.get_age_group_display()}) | {self.user_id}"
+    @property
+    def age(self):
+        import datetime
+        current_year = datetime.date.today().year
+        return current_year - self.year_of_birth
+# ---------------------------------
+# 4. App Usage Logs
+# ---------------------------------
+class AppUsageLog(models.Model):
+    ACTIVITY_TYPE_CHOICES = [
+        ('Numero', 'Numbers'),
+        ('Lian', 'Language'),
+        ('Arte', 'Art'),
+        ('Motri', 'Motor Skills'),
+        ('Sosyal', 'Social Skills'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    child = models.ForeignKey(Child, on_delete=models.CASCADE, related_name='usage_logs')
+    theme = models.CharField(max_length=50)
+    activity_type = models.CharField(max_length=20, choices=ACTIVITY_TYPE_CHOICES)
+    group = models.CharField(max_length=1, choices=Child.AGE_GROUP_CHOICES)
+    is_assessed = models.BooleanField(default=False)
+    was_successful = models.BooleanField(default=False)
+    date_accessed = models.DateField()
+    duration_seconds = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'app_usage_logs'
+        indexes = [
+            models.Index(fields=['child', 'date_accessed']),
+            models.Index(fields=['theme']),
+            models.Index(fields=['activity_type']),
+            models.Index(fields=['date_accessed']),
+            models.Index(fields=['is_assessed', 'was_successful']),
+        ]
+
+    def __str__(self):
+        return f"{self.child.first_name} → {self.theme} ({'Success' if self.was_successful else 'Fail'})"
+
+
+# ---------------------------------
+# 5. Preschool Enrollment Opt-In
+# ---------------------------------
+class PreschoolEnrollmentOptIn(models.Model):
+    CONTACT_METHOD_CHOICES = [
+        ('whatsapp', 'WhatsApp'),
+        ('portal', 'Portal Prompt'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    parent = models.OneToOneField(User, on_delete=models.CASCADE)
+    contact_method = models.CharField(max_length=20, choices=CONTACT_METHOD_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'preschool_enrollment_optins'
+
+    def __str__(self):
+        return f"Opt-in: {self.parent} via {self.contact_method}"
+
+
+# ---------------------------------
+# 6. APK Version Management
+# ---------------------------------
+class ApkVersion(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    version_name = models.CharField(max_length=20)
+    download_url = models.URLField()
+    is_latest = models.BooleanField(default=False)
+    released_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.is_latest:
+            # Ensure only one latest version
+            ApkVersion.objects.filter(is_latest=True).update(is_latest=False)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        db_table = 'apk_versions'
+        indexes = [
+            models.Index(fields=['is_latest']),
+        ]
+
+    def __str__(self):
+        return f"APK v{self.version_name} ({'latest' if self.is_latest else 'archived'})"
+
+
+# ---------------------------------
+# 7. WhatsApp Message Log
+# ---------------------------------
+class WhatsAppMessage(models.Model):
+    TEMPLATE_CHOICES = [
+        ('verification', 'Account Verification'),
+        ('monthly_report', 'Monthly Progress Report'),
+        ('enrollment_info', 'Preschool Enrollment Info'),
+    ]
+    STATUS_CHOICES = [
+        ('sent', 'Sent'),
+        ('failed', 'Failed'),
+        ('delivered', 'Delivered'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    to_number = models.CharField(max_length=15)
+    template_type = models.CharField(max_length=30, choices=TEMPLATE_CHOICES)
+    content = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+
+    class Meta:
+        db_table = 'whatsapp_messages'
+        indexes = [
+            models.Index(fields=['to_number']),
+            models.Index(fields=['template_type', 'sent_at']),
+        ]
+
+    def __str__(self):
+        return f" WhatsApp → {self.to_number} [{self.template_type}] "

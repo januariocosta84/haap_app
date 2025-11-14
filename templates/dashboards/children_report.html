@@ -1,0 +1,150 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+<h2>Children Report</h2>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-header">
+    <h3 class="mb-0">Filter Children</h3>
+  </div>
+  <div class="card-body">
+    <form method="get" class="row g-3">
+      
+      <!-- Municipality -->
+      <div class="col-md-3">
+        <label class="form-label">Municipality</label>
+        <select name="municipality" id="municipality" class="form-select">
+          <option value="">-- All --</option>
+          {% for m in municipalities %}
+            <option value="{{ m.id }}" {% if request.GET.municipality == m.id|stringformat:"s" %}selected{% endif %}>
+              {{ m.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Administrative Post -->
+      <div class="col-md-3">
+        <label class="form-label">Administrative Post</label>
+        <select name="administrative_post" id="administrative_post" class="form-select">
+          <option value="">-- All --</option>
+        </select>
+      </div>
+
+      <!-- Suco -->
+      <div class="col-md-3">
+        <label class="form-label">Suco</label>
+        <select name="suco" id="suco" class="form-select">
+          <option value="">-- All --</option>
+        </select>
+      </div>
+
+      <!-- Aldeia -->
+      <div class="col-md-3">
+        <label class="form-label">Aldeia</label>
+        <select name="aldeia" id="aldeia" class="form-select">
+          <option value="">-- All --</option>
+        </select>
+      </div>
+
+      <!-- Submit -->
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-primary mt-3">Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<hr>
+
+<h3>Children List</h3>
+<table class="table table-striped table-bordered">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Age Group</th>
+      <th>Parent</th>
+      <th>Municipality</th>
+      <th>Administrative Post</th>
+      <th>Suco</th>
+      <th>Aldeia</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for child in children %}
+    <tr>
+      <td>{{ child.first_name }}</td>
+      <td>{{ child.get_age_group_display }}</td>
+      <td>{{ child.parent.get_full_name }}</td>
+      <td>{{ child.parent.municipality.name }}</td>
+      <td>{{ child.parent.administrative_post.name }}</td>
+      <td>{{ child.parent.suco.name }}</td>
+      <td>{{ child.parent.aldeia.name }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7">No children found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr>
+
+<h3>Summary by Municipality</h3>
+<ul>
+  {% for row in report_by_municipality %}
+    <li>{{ row.parent__municipality__name }}: {{ row.total }}</li>
+  {% endfor %}
+</ul>
+
+<script>
+  // Municipality → Administrative Post
+  document.getElementById("id_municipality").addEventListener("change", function () {
+    let municipalityId = this.value;
+    if (municipalityId) {
+      fetch("{% url 'core:ajax_administrative_posts' %}?municipality_id=" + municipalityId)
+        .then(response => response.json())
+        .then(data => {
+          let postSelect = document.getElementById("id_administrative_post");
+          postSelect.innerHTML = '<option value="">-- All --</option>';
+          data.forEach(function (post) {
+            postSelect.innerHTML += `<option value="${post.id}">${post.name}</option>`;
+          });
+        });
+    }
+  });
+
+  // Administrative Post → Suco
+  document.getElementById("id_administrative_post").addEventListener("change", function () {
+    let apId = this.value;
+    if (apId) {
+      fetch("{% url 'core:ajax_sucos' %}?ap_id=" + apId)
+        .then(response => response.json())
+        .then(data => {
+          let sucoSelect = document.getElementById("id_suco");
+          sucoSelect.innerHTML = '<option value="">-- All --</option>';
+          data.forEach(function (suco) {
+            sucoSelect.innerHTML += `<option value="${suco.id}">${suco.name}</option>`;
+          });
+        });
+    }
+  });
+
+  // Suco → Aldeia
+  document.getElementById("id_suco").addEventListener("change", function () {
+    let sucoId = this.value;
+    if (sucoId) {
+      fetch("{% url 'core:ajax_aldeias' %}?suco_id=" + sucoId)
+        .then(response => response.json())
+        .then(data => {
+          let aldeiaSelect = document.getElementById("id_aldeia");
+          aldeiaSelect.innerHTML = '<option value="">-- All --</option>';
+          data.forEach(function (aldeia) {
+            aldeiaSelect.innerHTML += `<option value="${aldeia.id}">${aldeia.name}</option>`;
+          });
+        });
+    }
+  });
+</script>
+{% endblock %}

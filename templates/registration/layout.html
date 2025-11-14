@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+{%load static%}
+{% load i18n %}
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="{% static 'img/logo-ori.png' %}" rel="icon" type="image/png">
+    <head>
+      <title>{% block title %}Pajina Login{% endblock %}</title>
+  </head>
+  
+    <!-- Custom fonts for this template-->
+    <link href="{%static 'css/all.min.css'%}" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="{%static 'css/sb-admin-2.min.css'%}" rel="stylesheet">
+    <link href="{%static 'css/style.css'%}" rel="stylesheet">
+</head>
+
+<body>
+    {%block content%}
+
+
+    {% endblock %}
+
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="{%static 'vendor/jquery/jquery.min.js'%}"></script>
+    <script src="{%static 'vendor/bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="{%static 'vendor/jquery-easing/jquery.easing.min.js'%}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="{%static 'js/sb-admin-2.min.js'%}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="{%static 'js/news_form.js'%}"></script>
+    <!-- Page level plugins -->
+    <script src="{%static 'vendor/chart.js/Chart.min.js'%}"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="{%static 'dashboard/js/demo/chart-area-demo.js'%}"></script>
+    <script src="{%static 'dashboard/js/demo/chart-pie-demo.js'%}"></script>
+    <!--Htmx js-->
+  <script src="{%static 'dashboard/js/htmx.min.js'%}"></script>
+
+  <!--Alpine JS-->
+  
+  <script src="{%static 'js/alpine.js'%}"></script>
+    <script>
+        // Phone validation logic
+        const phoneInput = document.getElementById("id_username");
+        const errorDisplay = document.getElementById("phone-error");
+        const submitButton = document.getElementById("submit-button");
+  
+        const phoneRegex = /^\+?[1-9]\d{1,14}$/; // E.164 format regex for phone numbers
+  
+        phoneInput.addEventListener("input", () => {
+          const phone = phoneInput.value.trim();
+  
+          if (phone && !phoneRegex.test(phone)) {
+            errorDisplay.textContent = "Laos numeru nebe validu.";
+            errorDisplay.classList.remove("d-none");
+            submitButton.disabled = true;
+            return;
+          }
+  
+          errorDisplay.classList.add("d-none");
+          submitButton.disabled = false;
+  
+          if (phone) {
+            fetch(`/check-phone/?phone=${encodeURIComponent(phone)}`)
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.exists) {
+                  errorDisplay.textContent =
+                    "Numeru telfone ida ne'e rejistadu ona.";
+                  errorDisplay.classList.remove("d-none");
+                  submitButton.disabled = true;
+                }
+              })
+              .catch((error) =>
+                console.error("Error checking phone number:", error)
+              );
+          }
+        });
+  
+        console.log("Phone validation script loaded successfully.");
+      </script> 
+</body>
+
+</html>

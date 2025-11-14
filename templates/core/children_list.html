@@ -1,0 +1,45 @@
+{% extends "core/base.html" %}
+ <title>HAAP | {% block title %}Lista ba labarik sira{% endblock %}</title>
+{% block content %}
+<div class="container-fluid mt-4">
+  <h3>Hau nia oan sira</h3>
+
+  <a href="{% url 'core:register_child' %}" class="btn btn-success mb-3">
+    + Rejista oan
+  </a>
+
+  {% if children %}
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Naran kompletu</th>
+          <th>Tinan moris</th>
+          <th>Grupu Idade</th>
+          <th>Login ID</th>
+          <th>Registu iha</th>
+          <th>Aksaun</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for child in children %}
+          <tr>
+            <td>{{ child.first_name }}</td>
+            <td>{{ child.year_of_birth }}</td>
+            <td>{{ child.get_age_group_display }}</td>
+            <td>{{ child.user_id }}</td>
+            <td>{{ child.created_at|date:"Y-m-d H:i" }}</td>
+            <td>
+              <a href="{% url 'core:edit_child' child.id %}" class="btn btn-sm btn-primary">Editar</a>
+              <a href="{% url 'core:delete_child' child.id %}" class="btn btn-sm btn-danger">Hamos</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-info">
+      Ita la iha oan sira nebee rejista tan.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

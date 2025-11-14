@@ -1,0 +1,65 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>👩‍🏫 Dashboard ba Formadores husi Munisipiu - {{ municipality}}</h2>
+  <hr>
+
+  <!-- Summary Cards -->
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <div class="card text-center shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">👨‍👩‍👧 Parentes</h5>
+          <p class="display-4">{{ parents_count }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card text-center shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">🧒 Labarik</h5>
+          <p class="display-4">{{ children_count }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mt-5" id="teacherTabs" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" id="parents-tab" data-toggle="tab" href="#parents" role="tab">Parentes</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="children-tab" data-toggle="tab" href="#children" role="tab">Labarik</a>
+    </li>
+  </ul>
+
+  <div class="tab-content mt-3" id="teacherTabsContent">
+    <!-- Parents Tab -->
+    <div class="tab-pane fade show active" id="parents" role="tabpanel">
+      <ul class="list-group">
+        {% for parent in parents_list %}
+          <li class="list-group-item">
+            {{ parent.first_name }} {{ parent.last_name }} — {{ parent.municipality.name }}
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Laiha Familia.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Children Tab -->
+    <div class="tab-pane fade" id="children" role="tabpanel">
+      <ul class="list-group">
+        {% for child in children_list %}
+          <li class="list-group-item">
+            {{ child.first_name }} {{ child.last_name }} — Parent: {{ child.parent.first_name }} {{ child.parent.last_name }}
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted">Laiha Labarik.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

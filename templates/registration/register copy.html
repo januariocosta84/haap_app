@@ -1,0 +1,192 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="Formuláriu rejistu parentes" />
+    <meta name="author" content="WorlMosaic Ed Tech" />
+
+    <title>Formuláriu Rejistu Parentes</title>
+
+    <!-- Include external CSS -->
+    {% include './css.html' %}
+    <style>
+      .bg-register-image {
+        background: url("/static/img/images.png");
+        background-size: cover;
+        background-position: center;
+      }
+
+      .card {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-info {
+        background-color: #007bff;
+        border: none;
+        border-radius: 20px;
+        font-weight: bold;
+        padding: 10px 20px;
+      }
+
+      .btn-info:hover {
+        background-color: #0056b3;
+      }
+
+      .form-control {
+        border-radius: 10px;
+      }
+
+      .text-center a {
+        color: #007bff;
+      }
+
+      .text-center a:hover {
+        text-decoration: underline;
+      }
+
+      .bg-gradient-info {
+        background: linear-gradient(90deg, #6cb4f1, #0056b3);
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-info">
+    <div class="container">
+      <div class="card o-hidden shadow-lg my-5">
+        <div class="row">
+        
+          <!-- Right Column (Form) -->
+          <div class="col-12">
+            <div class="p-5">
+              <!-- Header Section -->
+              <div class="text-center">
+                <h1 class="h2 text-gray-900 mb-4">Formulariu: Halo Konta Foun</h1>
+              </div>
+
+              <!-- Form Section -->
+              <form class="user" method="POST">
+                {% csrf_token %}
+
+                <!-- Naran Section -->
+                <div class="form-group row">
+                  <div class="col-sm-6 mb-3">
+                    <label for="narandahuluk">Naran dahuluk:<span class="text-danger">*</span></label>
+                    {{ form.first_name }}
+                  </div>
+                  <div class="col-sm-6">
+                    <label for="naranikus">Naran ikus:<span class="text-danger">*</span></label>
+                    {{ form.last_name }}
+                  </div>
+                </div>
+
+                <!-- Kontaktu Section -->
+                <div class="form-group row">
+                  <div class="col-sm-6 mb-3">
+                    <label for="email">Email (Opsional):</label>
+                    {{ form.email }}
+                  </div>
+                  <div class="col-sm-6">
+                    <label for="phone">Numeru Telfone :<span class="text-danger">*</span></label>
+                    {{ form.username }}
+                    <small id="phone-error" class="text-danger d-none">Numeru telfone ida ne'e rejistadu ona!</small>
+                  </div>
+                </div>
+
+                <!-- Endresu Section -->
+                <div class="form-group row">
+                  <div class="col-sm-6 mb-3">
+                    <label for="munisipiu">Munisipiu: <span class="text-danger">*</span></label>
+                    {{ parent_add.municipality }}
+                  </div>
+                  <div class="col-sm-6">
+                    <label for="posto_admin">Postu Administrativu: <span class="text-danger">*</span></label>
+                    {{ parent_add.administrative_post }}
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <div class="col-sm-6 mb-3">
+                    <label for="suco">Suco: <span class="text-danger">*</span></label>
+                    {{ parent_add.suco }}
+                  </div>
+                  <div class="col-sm-6">
+                    <label for="aldea">Aldeia: <span class="text-danger">*</span></label>
+                    {{ parent_add.village }}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-3">
+                    <div class="form-group">
+                      <button class="btn btn-info btn-block" id="submit-button">Rejistu</button>
+                    </div>
+                  </div>
+                  <div class="col-9">
+                    <div class="text-center">
+                      <a href="{% url 'reset_password_sms' %}">Haluan Password?</a>
+                    </div>
+                    <div class="text-center">
+                      <a href="{% url 'login' %}">Iha ona konta familia? Login!</a>
+                    </div>
+                </div>
+               
+                </div>
+              </form>
+            
+            </div>
+          </div>
+        </div>
+        <!-- Footer -->
+        <div class="card-footer text-center">
+          &copy;  World Mosaic 2025
+        </div>
+      </div>
+    </div>
+
+    <!-- Include external JS -->
+    {% include './js.html' %}
+    <script>
+      // Phone validation logic
+      const phoneInput = document.getElementById("id_username");
+      const errorDisplay = document.getElementById("phone-error");
+      const submitButton = document.getElementById("submit-button");
+
+      const phoneRegex = /^\+?[1-9]\d{1,14}$/; // E.164 format regex for phone numbers
+
+      phoneInput.addEventListener("input", () => {
+        const phone = phoneInput.value.trim();
+
+        if (phone && !phoneRegex.test(phone)) {
+          errorDisplay.textContent = "Laos numeru nebe validu.";
+          errorDisplay.classList.remove("d-none");
+          submitButton.disabled = true;
+          return;
+        }
+
+        errorDisplay.classList.add("d-none");
+        submitButton.disabled = false;
+
+        if (phone) {
+          fetch(`/check-phone/?phone=${encodeURIComponent(phone)}`)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.exists) {
+                errorDisplay.textContent =
+                  "Numeru telfone ida ne'e rejistadu ona.";
+                errorDisplay.classList.remove("d-none");
+                submitButton.disabled = true;
+              }
+            })
+            .catch((error) =>
+              console.error("Error checking phone number:", error)
+            );
+        }
+      });
+
+      console.log("Phone validation script loaded successfully.");
+    </script>
+  </body>
+</html>

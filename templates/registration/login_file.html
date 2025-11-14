@@ -1,0 +1,139 @@
+{%include './css.html'%}
+<style>
+  .bg-login-image {
+    background: url("/static/img/images.png");
+    background-position: center;
+    background-size: cover;
+  }
+  .bg-gradient-info {
+    background: linear-gradient(90deg, #6cb4f1, #0056b3);
+  }
+</style>
+<body class="bg-gradient-info">
+  <div class="container ">
+    <h1 class="h4 text-gray-900 ">Bemvindo mai <strong>hahu</strong> App!</h1>
+    <!-- Outer Row -->
+    <div class="row justify-content-center">
+      <div class="col-xl-10 col-lg-12 col-md-9">
+        <div class="card o-hidden border-0 shadow-lg my-5 border-bottom-info">
+          <div class="card-body p-0">
+            {% include 'dashboard/messaging.html' %}
+            <!-- Nested Row within Card Body -->
+            <div class="row">
+              <div
+                class="col-lg-6 d-none d-lg-block bg-login-image border-left-warning"
+              ></div>
+              <div class="col-lg-6">
+                <!-- <div class="p-5">
+                  <div class="text-center border-bottom-info mb-3">
+                    <h1 class="h4 text-gray-900 mb-4">Bemvindo mai <strong>hahu</strong> App!</h1>
+                    <dialog></dialog>
+                  </div> -->
+  
+                  <form action="{% url 'login' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                      <label for="username" class="label">Numeru Telefone</label>
+  
+                      <div class="input-group">
+                        {{ form.username }}
+  
+                        <div class="input-group-append">
+                          <span class="input-group-text">
+                            <i class="mdi mdi-check-circle-outline"></i>
+                          </span>
+                        </div>
+                        <br />
+                        <small id="phone-error" class="text-danger d-none">
+                          Numeru telfone ida ne'e rejistadu ona!
+                        </small>
+                      </div>
+                      <small id="phone-error" class="text-danger d-none">
+                        Numeru telfone ida ne'e rejistadu ona!
+                      </small>
+                    </div>
+                    <div class="form-group">
+                      <label for="password" class="label">Palavras Passe</label>
+                      <div class="input-group">
+                        {{ form.password }}
+                        <div class="input-group-append">
+                          <span class="input-group-text">
+                            <i class="mdi mdi-check-circle-outline"></i>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <button type="submit" class="btn btn-success">Login</button>
+                    </div>
+                    <div class="text-block text-center my-3">
+                      <span class="text-small font-weight-semibold"
+                        >Laos Membro ?</span
+                      >
+                      <a href="{%url 'regist'%}" class="text-black text-small"
+                        >Rejistu Konta Foun</a
+                      >
+                    </div>
+                  </form>
+  
+                  <div class="text-center">
+                    <a class="small" href="{%url 'reset_password_sms'%}"
+                      >Haluan Password?</a
+                    >
+                  </div>
+                  <div class="text-center">
+                    <a class="small" href="{% url 'regist' %}"
+                      >Rejistu Konta foun!</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+       <div class="card-footer text-center">
+        &copy;  World Mosaic 2025
+      </div>
+        </div>
+      </div>
+  
+    </div>
+  </div>
+</body>
+
+<script>
+  // Phone validation logic
+  const phoneInput = document.getElementById("id_username");
+  const errorDisplay = document.getElementById("phone-error");
+  const submitButton = document.getElementById("submit-button");
+
+  const phoneRegex = /^\+?[1-9]\d{1,14}$/; // E.164 format regex for phone numbers
+
+  phoneInput.addEventListener("input", () => {
+    const phone = phoneInput.value.trim();
+
+    if (phone && !phoneRegex.test(phone)) {
+      errorDisplay.textContent = "Laos numeru nebe validu.";
+      errorDisplay.classList.remove("d-none");
+      submitButton.disabled = true;
+      return;
+    }
+
+    errorDisplay.classList.add("d-none");
+    submitButton.disabled = false;
+
+    if (phone) {
+      fetch(`/check-phone/?phone=${encodeURIComponent(phone)}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.exists) {
+            errorDisplay.textContent = "Numeru telfone ida ne'e rejistadu ona.";
+            errorDisplay.classList.remove("d-none");
+            submitButton.disabled = true;
+          }
+        })
+        .catch((error) => console.error("Error checking phone number:", error));
+    }
+  });
+</script>
+{%include './js.html' %}

@@ -1,0 +1,75 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Moe Dashboard{% endblock %}
+{% block page_title %}Moe Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="mt-4">Moe Admin Dashboard</h1>
+      <hr>
+      <p>Welcome to the Moe administrative dashboard. Here you can find an overview of the system statistics.</p>
+      
+    </div>  
+  </div>
+
+  <div class="row">
+    <!-- All Users -->
+    <div class="col-lg-3 col-6">
+      <div class="small-box text-bg-primary">
+        <div class="inner">
+          <h3>{{ all_users }}</h3>
+          <p>Utilizadore sira</p>
+        </div>
+        <i class="bi bi-people-fill small-box-icon"></i>
+        <a href="{% url 'core:user_management' %}" class="small-box-footer link-light link-underline-opacity-0">
+          Mais informasaun <i class="bi bi-link-45deg"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Parents -->
+    <div class="col-lg-3 col-6">
+      <div class="small-box text-bg-success">
+        <div class="inner">
+          <h3>{{ parents }}</h3>
+          <p>Parentes</p>
+        </div>
+        <i class="bi bi-person-hearts small-box-icon"></i>
+        <a href="#" class="small-box-footer link-light link-underline-opacity-0">
+          Mais informasaun <i class="bi bi-link-45deg"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Municipality Analysts -->
+    <div class="col-lg-3 col-6">
+      <div class="small-box text-bg-warning">
+        <div class="inner">
+          <h3>{{ municipality_analysts }}</h3>
+          <p>Analistas Munisípiu</p>
+        </div>
+        <i class="bi bi-bar-chart-line-fill small-box-icon"></i>
+        <a href="#" class="small-box-footer link-dark link-underline-opacity-0">
+          Mais informasaun <i class="bi bi-link-45deg"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- Children -->
+    <div class="col-lg-3 col-6">
+      <div class="small-box text-bg-danger">
+        <div class="inner">
+          <h3>{{ children }}</h3>
+          <p>Oan sira</p>
+        </div>
+        <i class="bi bi-emoji-smile-fill small-box-icon"></i>
+        <a href="#" class="small-box-footer link-light link-underline-opacity-0">
+          Mais informasaun <i class="bi bi-link-45deg"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

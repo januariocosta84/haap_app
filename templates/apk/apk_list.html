@@ -1,0 +1,42 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="container-fluid mt-4">
+  <h3>Versaun APK</h3>
+  <a href="{% url 'core:upload_apk' %}" class="btn btn-success mb-3">+ Upload APK Foun</a>
+
+  {% if apks %}
+    <table class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Versaun</th>
+          <th>Download URL</th>
+          <th>Ikus?</th>
+          <th>Release</th>
+          <th>Aksaun</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for apk in apks %}
+          <tr>
+            <td>{{ apk.version_name }}</td>
+            <td><a href="{{ apk.download_url }}" target="_blank">Download</a></td>
+            <td>
+              {% if apk.is_latest %}
+                <span class="badge bg-success">Latest</span>
+              {% else %}
+                <span class="badge bg-secondary">Archived</span>
+              {% endif %}
+            </td>
+            <td>{{ apk.released_at|date:"Y-m-d H:i" }}</td>
+            <td>
+              <a href="{% url 'core:edit_apk' apk.id %}" class="btn btn-sm btn-primary">Edit</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-info">No APK versions uploaded yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

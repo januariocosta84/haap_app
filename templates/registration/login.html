@@ -1,0 +1,72 @@
+
+{% extends "./layout.html" %}
+{%block content%}
+   <!-- Background Carousel -->
+   <div id="backgroundCarousel" class="carousel slide" data-ride="carousel" data-interval="3000">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="/static/img/Background 1_Transport.png" alt="Background 1">
+      </div>
+      <div class="carousel-item">
+        <img src="/static/img/Background 2_Me.png" alt="Background 2">
+      </div>
+      <div class="carousel-item">
+        <img src="/static/img/Background 3_Culture.png" alt="Background 3">
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Form Overlay -->
+  <div class="overlay-container">
+    <div class="container w-100 pt-3">
+    <div class="login-title d-flex align-items-center">
+        <img src="/static/img/logo-ori.png" alt="Logo" class="logo">
+        <h1>Bemvindo Mai hahu App!</h1>
+    </div>
+    <div class="login-container">
+     
+      <form action="{% url 'login' %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+          {% include 'dashboard/messaging.html' %}
+          <label for="username" class="label">Numeru Telefone</label>
+          <div class="input-group">
+            {{ form.username }}
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <i class="mdi mdi-check-circle-outline"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="password" class="label">Palavras Passe</label>
+          <div class="input-group">
+            {{ form.password }}
+            <div class="input-group-append">
+              <span class="input-group-text">
+                <i class="mdi mdi-check-circle-outline"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <button id="submit-button" style="border: none; background: none; padding: 0;">
+            <img src="/static/img/Button 1_Login.png" alt="Rejistu" style="height: 70px; border: none; outline: none;">
+          </button>
+        </div>
+        <div class="text-block text-center my-3">
+          <span class="text-small font-weight-semibold" style="color: rgb(115, 99, 92);">Laos Membro ?</span>
+          <a href="{% url 'regist' %}" class="text-black text-small">Rejistu Konta Foun</a>
+        </div>
+        
+        <div class="text-center">
+          <span class="text-small font-weight-semibold "  style="color: rgb(115, 99, 92);">Haluan Password ?</span>
+          <a href="{% url 'reset_password_sms' %}">Haluan Password?</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+ 

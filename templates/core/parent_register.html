@@ -1,0 +1,179 @@
+<!-- templates/core/parent_register.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Parent Registration - HAAP uma</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f8fb; }
+    .form-container { max-width: 650px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .form-group { margin-bottom: 18px; }
+    label { display: block; margin-bottom: 6px; font-weight: bold; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+    .btn { background: #005b96; color: white; padding: 12px 20px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+    .btn:hover { background: #003f6b; }
+    .messages { margin: 15px 0; padding: 10px; border-radius: 6px; }
+    .alert-success { background: #d4edda; color: #155724; }
+    .alert-error { background: #f8d7da; color: #721c24; }
+  </style>
+
+  <!-- Cascading Dropdown Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const municipalitySelect = document.getElementById('id_municipality');
+      const apSelect = document.getElementById('id_administrative_post');
+      const sucoSelect = document.getElementById('id_suco');
+      const aldeiaSelect = document.getElementById('id_aldeia');
+
+      // Update Administrative Posts when municipality changes
+      municipalitySelect.addEventListener('change', function () {
+        const municipalityId = this.value;
+        if (municipalityId) {
+          fetch(`/api/locations/municipality/${municipalityId}/administrative-posts/`)
+            .then(response => response.json())
+            .then(data => {
+              apSelect.innerHTML = '<option value="">Select Administrative Post</option>';
+              data.forEach(ap => {
+                const opt = document.createElement('option');
+                opt.value = ap.id;
+                opt.textContent = ap.name;
+                apSelect.appendChild(opt);
+              });
+              sucoSelect.innerHTML = '<option value="">Select Suco</option>';
+              aldeiaSelect.innerHTML = '<option value="">Select Aldeia</option>';
+            });
+        } else {
+          apSelect.innerHTML = '<option value="">Select Administrative Post</option>';
+          sucoSelect.innerHTML = '<option value="">Select Suco</option>';
+          aldeiaSelect.innerHTML = '<option value="">Select Aldeia</option>';
+        }
+      });
+
+      // Update Sucos when Administrative Post changes
+      apSelect.addEventListener('change', function () {
+        const apId = this.value;
+        if (apId) {
+          fetch(`/api/locations/administrative-post/${apId}/sucos/`)
+            .then(response => response.json())
+            .then(data => {
+              sucoSelect.innerHTML = '<option value="">Select Suco</option>';
+              data.forEach(suco => {
+                const opt = document.createElement('option');
+                opt.value = suco.id;
+                opt.textContent = suco.name;
+                sucoSelect.appendChild(opt);
+              });
+              aldeiaSelect.innerHTML = '<option value="">Select Aldeia</option>';
+            });
+        }
+      });
+
+      // Update Aldeias when Suco changes
+      sucoSelect.addEventListener('change', function () {
+        const sucoId = this.value;
+        if (sucoId) {
+          fetch(`/api/locations/suco/${sucoId}/aldeias/`)
+            .then(response => response.json())
+            .then(data => {
+              aldeiaSelect.innerHTML = '<option value="">Select Aldeia</option>';
+              data.forEach(aldeia => {
+                const opt = document.createElement('option');
+                opt.value = aldeia.id;
+                opt.textContent = aldeia.name;
+                aldeiaSelect.appendChild(opt);
+              });
+            });
+        }
+      });
+    });
+  </script>
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+  const whatsappInput = document.getElementById('id_whatsapp_number');
+  console.log(whatsappInput);
+
+  // whatsappInput.addEventListener('blur', function() {
+  //   const number = whatsappInput.value.trim();
+  //   if (!number) return;
+
+  //   fetch(`/check-whatsapp-number/?number=${encodeURIComponent(number)}`)
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       if (data.exists) {
+  //         alert("⚠️ This WhatsApp number is already registered!");
+  //         whatsappInput.value = "";
+  //         whatsappInput.focus();
+  //       }
+  //     })
+  //     .catch(error => console.error("Error checking number:", error));
+  // });
+});
+</script>
+
+</head>
+<body>
+  <div class="form-container">
+    <h2>Register as a Parent</h2>
+    <p>Join HAAP uma to support your child’s early learning at home.</p>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="messages alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label for="{{ form.first_name.id_for_label }}">First Name *</label>
+        {{ form.first_name }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.last_name.id_for_label }}">Last Name *</label>
+        {{ form.last_name }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.address.id_for_label }}">Address *</label>
+        {{ form.address }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.whatsapp_number.id_for_label }}">WhatsApp Number *</label>
+        {{ form.whatsapp_number }}
+        <small>{{ form.whatsapp_number.help_text }}</small>
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.email.id_for_label }}">Email (Optional)</label>
+        {{ form.email }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.municipality.id_for_label }}">Municipality *</label>
+        {{ form.municipality }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.administrative_post.id_for_label }}">Administrative Post *</label>
+        {{ form.administrative_post }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.suco.id_for_label }}">Suco *</label>
+        {{ form.suco }}
+      </div>
+
+      <div class="form-group">
+        <label for="{{ form.aldeia.id_for_label }}">Aldeia *</label>
+        {{ form.aldeia }}
+      </div>
+
+      <button type="submit" class="btn">Register & Get Verification Link</button>
+    </form>
+  </div>
+</body>
+</html>

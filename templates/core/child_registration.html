@@ -1,0 +1,37 @@
+{% extends "core/base.html" %}
+ <title>HAAP | {% block title %}Rejista labarik sira{% endblock %}</title>
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+  <h3>Rejista ita nia oan sira</h3>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      {{ form.first_name.label_tag }}  
+      {{ form.first_name }}
+      {% if form.first_name.errors %}
+        <div class="text-danger">{{ form.first_name.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.year_of_birth.label_tag }}
+      {{ form.year_of_birth }}
+      {% if form.year_of_birth.errors %}
+        <div class="text-danger">{{ form.year_of_birth.errors }}</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-3">
+      {{ form.age_group.label_tag }}
+      {{ form.age_group }}
+      {% if form.age_group.errors %}
+        <div class="text-danger">{{ form.age_group.errors }}</div>
+      {% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Rejista oan</button>
+  </form>
+</div>
+{% endblock %}
