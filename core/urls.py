@@ -39,6 +39,7 @@ urlpatterns = [
     path("dashboard/admin/", views.moe_admin_dashboard, name="moe_admin_dashboard"),
     path("dashboard/users/", views.UserManagementView.as_view(), name="user_management"),
     path('dashboard/parents/', views.parent_list, name='parent_list'),
+        path('dashboard/parents/export-pdf/', views.export_parents_pdf, name='export_parents_pdf'),
     path('dashboard/logs/', views.AppUsageLogListView.as_view(), name='app_usage_logs'),
     path('reports/children/', views.ChildrenReportView.as_view(), name='children_report'),
     #path('reports/apk/', views.APKReportView.as_view(), name='apk_report'),

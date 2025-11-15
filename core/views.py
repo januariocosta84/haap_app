@@ -5,6 +5,14 @@ from django.db.models import Count
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
+from io import BytesIO
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib import colors
+from datetime import datetime
 
 from core.models import AdministrativePost, Aldeia, ApkVersion, AppUsageLog, Child, Municipality, Suco, User
 from .forms import ApkVersionForm, ChildRegistrationForm, LoginForm, ParentRegisterForm, ParentRegistrationForm, ProfileImageForm, UserRegistrationForm
@@ -360,20 +368,24 @@ class UserManagementView(View):
     
 
 def parent_list(request):
-    dummy_users = [
-        {"username": "parent1", "whatsapp_number": "+67077111111", "first_name": "Maria", "last_name": "Soares", "email": "maria@example.com"},
-        {"username": "parent2", "whatsapp_number": "+67077222222", "first_name": "João", "last_name": "Gusmão", "email": "joao@example.com"},
-        {"username": "parent3", "whatsapp_number": "+67077333333", "first_name": "Ana", "last_name": "Martins", "email": "ana@example.com"},
-    ]
-
-    for u in dummy_users:
-        User.objects.get_or_create(
-            whatsapp_number=u["whatsapp_number"],
-            defaults={**u, "role": "parent"},
-        )
-
-    parents = User.objects.filter(role="parent")
-    return render(request, "parents/parent_list.html", {"parents": parents})
+    parents = User.objects.filter(role="parent").order_by('-date_joined')
+    
+    # Filter by municipality if provided
+    municipality_id = request.GET.get("municipality")
+    if municipality_id:
+        parents = parents.filter(municipality_id=municipality_id)
+    
+    paginator = Paginator(parents, 10)  # 10 parents per page
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    
+    # Get all municipalities for dropdown
+    municipalities = Municipality.objects.all().order_by("name")
+    
+    return render(request, "parents/parent_list.html", {
+        "page_obj": page_obj,
+        "municipalities": municipalities
+    })
 
 class AppUsageLogListView(ListView):
     model = AppUsageLog
@@ -583,3 +595,91 @@ class LatestApkView(ListView):
     def get_queryset(self):
         # Show only latest version(s) - usually one, but in case of multiple
         return ApkVersion.objects.filter(is_latest=True).order_by("-released_at")
+
+
+@login_required
+def export_parents_pdf(request):
+    """Export filtered parents list to PDF"""
+    municipality_id = request.GET.get("municipality")
+    
+    # Get parents based on municipality filter
+    parents = User.objects.filter(role="parent").order_by('-date_joined')
+    
+    if municipality_id:
+        parents = parents.filter(municipality_id=municipality_id)
+        municipality = Municipality.objects.get(id=municipality_id)
+        municipality_name = municipality.name
+    else:
+        municipality_name = "All Municipalities"
+    
+    # Create PDF in memory
+    pdf_buffer = BytesIO()
+    doc = SimpleDocTemplate(pdf_buffer, pagesize=A4)
+    story = []
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        textColor=colors.HexColor('#1f4788'),
+        spaceAfter=12,
+        alignment=1  # center
+    )
+    
+    # Title
+    title = Paragraph(f"Lista Parentes - {municipality_name}", title_style)
+    story.append(title)
+    story.append(Spacer(1, 0.2*inch))
+    
+    # Metadata
+    metadata_style = ParagraphStyle(
+        'Metadata',
+        parent=styles['Normal'],
+        fontSize=10,
+        textColor=colors.grey,
+    )
+    metadata = Paragraph(f"<i>Gerada iha: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}</i>", metadata_style)
+    story.append(metadata)
+    story.append(Spacer(1, 0.3*inch))
+    
+    # Prepare table data
+    table_data = [['Naran', 'WhatsApp', 'Email', 'Munisipiu']]
+    
+    for parent in parents:
+        table_data.append([
+            f"{parent.first_name} {parent.last_name}",
+            parent.whatsapp_number or "-",
+            parent.email or "-",
+            str(parent.municipality) if parent.municipality else "-"
+        ])
+    
+    if len(table_data) == 1:  # Only header
+        story.append(Paragraph("Walha dados no filtru ne'e.", styles['Normal']))
+    else:
+        # Create table
+        table = Table(table_data, colWidths=[2*inch, 1.5*inch, 2*inch, 1.5*inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1f4788')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]),
+        ]))
+        story.append(table)
+    
+    # Build PDF
+    doc.build(story)
+    pdf_buffer.seek(0)
+    
+    # Return PDF as response
+    response = HttpResponse(pdf_buffer, content_type='application/pdf')
+    filename = f"parents_list_{municipality_name.replace(' ', '_')}_{datetime.now().strftime('%d%m%Y')}.pdf"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    return response

@@ -18,7 +18,7 @@ SECRET_KEY = 'django-insecure-(*yq(eersn2q4b11ya9121o4--0=u!+x-webh*uo371kokwup%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.23', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['192.168.1.23', 'localhost', '127.0.0.1','154.26.155.43']
 
 
 # Application definition
@@ -79,7 +79,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'haap',         # Replace with your MySQL database name
         'USER': 'root',         # Replace with your MySQL username
-        'PASSWORD': '',         # Replace with your MySQL password
+        'PASSWORD': 'Paddington2025yoyo',         # Replace with your MySQL password
         'HOST': 'localhost',                # Or your MySQL server host
         'PORT': '3306',                     # Default MySQL port
         'OPTIONS': {

@@ -266,7 +266,7 @@ class ParentRegisterForm(forms.ModelForm):
         
         # Preload municipalities
         self.fields['municipality'].queryset = Municipality.objects.all()
-        self.fields['municipality'].empty_label = "Selesa Munisípiu"
+        self.fields['municipality'].empty_label = "Selesiona Munisípiu"
 
         # Default empty for dependent fields
         self.fields['administrative_post'].queryset = AdministrativePost.objects.none()
